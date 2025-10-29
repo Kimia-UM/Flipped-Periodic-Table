@@ -494,6 +494,10 @@
               naik peringkat!
             </p>
             <p>
+              <strong>📊 Total Unsur:</strong>
+              <span id="totalElements">118</span>
+            </p>
+            <p>
               <strong>✅ Dijawab Benar:</strong>
               <span id="answeredCorrect">0</span>
             </p>
@@ -1210,7 +1214,7 @@
           mass: "(282)",
           r: 7,
           c: 11,
-          spdf: "1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d¹⁰ 4p⁶ 5s² 4d¹⁰ 5p⁶ 6s² 4f¹⁴ 5d¹⁰ 6p⁶ 7s² 5f¹⁴ 6d⁸ 6d⁹",
+          spdf: "1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d¹⁰ 4p⁶ 5s² 4d¹⁰ 5p⁶ 6s² 4f¹⁴ 5d¹⁰ 6p⁶ 7s² 5f¹⁴ 6d⁹",
         },
         {
           z: 112,
@@ -1430,9 +1434,7 @@
           );
         });
 
-        // Hapus semua spasi
-        normalized = normalized.replace(/\s+/g, "");
-
+        // Pertahankan spasi untuk validasi yang lebih ketat
         return normalized;
       }
 
@@ -1666,4 +1668,3 @@
     </script>
   </body>
 </html>
-
