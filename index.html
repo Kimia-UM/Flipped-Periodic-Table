@@ -628,6 +628,22 @@
                   minlength="6"
                 />
               </div>
+              <div class="form-group">
+                <label>Pilih Kelas</label>
+                <select id="signupClass" required>
+                  <option value="">-- Pilih Kelas --</option>
+                  <option value="X-1">X-1</option>
+                  <option value="X-2">X-2</option>
+                  <option value="X-3">X-3</option>
+                  <option value="X-4">X-4</option>
+                  <option value="X-5">X-5</option>
+                  <option value="X-6">X-6</option>
+                  <option value="X-7">X-7</option>
+                  <option value="X-8">X-8</option>
+                  <option value="X-9">X-9</option>
+                  <option value="X-10">X-10</option>
+                </select>
+              </div>
               <button type="submit" class="btn-submit" id="btnSignupSubmit">
                 Daftar
               </button>
@@ -682,6 +698,13 @@
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
+      import {
+        getDatabase,
+        ref,
+        set,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      const db = getDatabase(app);
 
       const modal = document.getElementById("authModal");
       const btnShowLogin = document.getElementById("btnShowLogin");
@@ -726,9 +749,11 @@
           const name = document.getElementById("signupName").value;
           const email = document.getElementById("signupEmail").value;
           const password = document.getElementById("signupPassword").value;
+          const kelas = document.getElementById("signupClass").value;
           const btnSubmit = document.getElementById("btnSignupSubmit");
           const errorDiv = document.getElementById("signupError");
           const successDiv = document.getElementById("signupSuccess");
+
           errorDiv.style.display = "none";
           successDiv.style.display = "none";
           btnSubmit.disabled = true;
@@ -740,9 +765,29 @@
               email,
               password
             );
-            await updateProfile(userCredential.user, { displayName: name });
+            const user = userCredential.user;
+
+            await updateProfile(user, { displayName: name });
+
+            // Simpan data ke Realtime Database (users dan leaderboard)
+            await set(ref(db, "users/" + user.uid), {
+              nama: name,
+              email: email,
+              kelas: kelas,
+              skor: 0,
+            });
+
+            // Simpan juga ke leaderboard
+            await set(ref(db, "leaderboard/" + user.uid), {
+              nama: name,
+              email: email,
+              kelas: kelas,
+              skor: 0,
+            });
+
             successDiv.textContent = "✓ Akun berhasil dibuat! Mengalihkan...";
             successDiv.style.display = "block";
+
             setTimeout(() => {
               window.location.href = "MK2.html";
             }, 1500);
@@ -754,6 +799,7 @@
               msg = "Password terlalu lemah. Minimal 6 karakter.";
             else if (error.code === "auth/invalid-email")
               msg = "Format email tidak valid.";
+
             errorDiv.textContent = "⚠ " + msg;
             errorDiv.style.display = "block";
           } finally {
