@@ -449,44 +449,109 @@
     <h1>Tabel Periodik Interaktif – Flipped Periodic Table</h1>
     <p class="subtitle">Ayo Belajar Konfigurasi Elektron</p>
 
+    <!-- User nickname centered, below subtitle and above header buttons -->
+    <div id="userNameRow" style="text-align:center; margin:8px 0 12px 0;">
+      <span id="userDisplay" style="font-weight:600; font-size:20px; display:inline-block;">
+        <!-- filled by Firebase onAuthStateChanged -->
+      </span>
+    </div>
+
+    <!-- Sound controls (effects + music) in a single row -->
+    <div id="soundControls" style="display:flex; justify-content:center; gap:8px; margin-bottom:8px;"></div>
+
+    <!-- Score shown under the sound controls, centered -->
+    <div id="scoreRow" style="text-align:center; margin-bottom:12px;">
+      <span id="userScore" style="font-weight:800; color:#28a745; font-size:28px; display:inline-block; line-height:1;">Skor: 0</span>
+    </div>
+
     <div class="header-nav">
       <a href="index.html" class="nav-button btn-back">⬅️ Kembali</a>
-      <span id="userDisplay" style="margin-left: 10px; font-weight: 600"></span>
+      <button class="nav-button" id="resetProgressBtn" style="background:linear-gradient(135deg,#ff6b6b,#ff4757);color:white;" onclick="resetProgress()">🔄 Reset Skor & Kartu</button>
       <a href="#" class="nav-button btn-leaderboard" onclick="showLeaderboard()"
         >🏆 Lihat Peringkat</a
       >
     </div>
 
-    <!-- Leaderboard Modal -->
-    <div id="leaderboardModal" class="leaderboard-modal">
-      <div class="leaderboard-content">
-        <span class="close-leaderboard" onclick="closeLeaderboard()"
-          >&times;</span
-        >
-        <div class="leaderboard-header">
-          <h2>🏆 Papan Peringkat</h2>
-        </div>
-        <div class="leaderboard-body">
-          <div class="your-score">
-            <h3>Skor Anda</h3>
-            <div class="score-value" id="userScore">0</div>
-            <p style="margin-top: 10px; font-size: 0.9em">
-              Unsur berhasil dijawab
-            </p>
-          </div>
+    <!-- 🎯 Modal Leaderboard -->
+<div
+  id="leaderboardModal"
+  style="
+    display:none;
+    position:fixed;
+    top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(4px);
+    z-index:1000;
+    justify-content:center;
+    align-items:center;
+  "
+>
+  <div
+    style="
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      width:90%;
+      max-width:600px;
+      max-height:80%;
+      overflow:auto;
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+      position:relative;
+    "
+  >
+    <button
+      onclick="closeLeaderboard()"
+      style="
+        position:absolute;
+        top:10px;
+        right:10px;
+        background:#ff4444;
+        color:white;
+        border:none;
+        padding:6px 10px;
+        border-radius:6px;
+        cursor:pointer;
+      "
+    >
+      ✖
+    </button>
+    <h2 style="text-align:center;margin-bottom:10px;">🏆 Leaderboard</h2>
 
-          <table class="leaderboard-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Pemain</th>
-                <th>Skor</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-              <!-- Data akan diisi oleh JavaScript -->
-            </tbody>
-          </table>
+    <!-- 🔘 Tombol Filter -->
+    <div style="text-align:center;margin-bottom:10px;">
+      <button
+        onclick="showLeaderboard('global')"
+        style="margin-right:10px;padding:6px 10px;border-radius:6px;cursor:pointer;"
+      >
+        🌍 Global
+      </button>
+      <button
+        onclick="showLeaderboard('kelas')"
+        style="padding:6px 10px;border-radius:6px;cursor:pointer;"
+      >
+        🏫 Kelas Saya
+      </button>
+    </div>
+
+    <!-- 📊 Tabel -->
+    <table
+      style="
+        width:100%;
+        border-collapse:collapse;
+        text-align:center;
+        font-family:Poppins,sans-serif;
+      "
+    >
+      <thead style="background:#f0f0f0;">
+        <tr>
+          <th style="padding:8px;">Peringkat</th>
+          <th style="padding:8px;">Nama</th>
+          <th style="padding:8px;">Kelas</th>
+          <th style="padding:8px;">Skor</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboardBody"></tbody>
+    </table>
 
           <div class="progress-info">
             <p>
@@ -502,6 +567,61 @@
               <span id="answeredCorrect">0</span>
             </p>
           </div>
+        </div>
+      </div>
+
+          <!-- 🏷️ Modal Pilih Kelas (untuk user yang belum punya kelas) -->
+          <div id="chooseClassModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+            <div style="background:white; padding:20px; border-radius:12px; width:90%; max-width:420px; text-align:center;">
+              <h3>Pilih Kelas Anda</h3>
+              <p style="margin-top:6px; margin-bottom:12px; color:#333;">Agar leaderboard menampilkan kelas Anda, pilih kelas yang sesuai.</p>
+              <select id="kelasSelect" style="width:100%; padding:8px; font-size:16px; margin-bottom:12px;">
+                 <option value="X-1">X-1</option>
+                  <option value="X-2">X-2</option>
+                  <option value="X-3">X-3</option>
+                  <option value="X-4">X-4</option>
+                  <option value="X-5">X-5</option>
+                  <option value="X-6">X-6</option>
+                  <option value="X-7">X-7</option>
+                  <option value="X-8">X-8</option>
+                  <option value="X-9">X-9</option>
+                  <option value="X-10">X-10</option>
+              </select>
+              <div style="display:flex; gap:8px; justify-content:center;">
+                <button id="saveKelasBtn" style="padding:8px 12px; background:#28a745; color:white; border:none; border-radius:8px; cursor:pointer;">Simpan</button>
+              </div>
+            </div>
+          </div>
+              <!-- Reset Confirmation Modal -->
+              <div id="resetConfirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2500; justify-content:center; align-items:center;">
+                <div style="background:white; padding:18px; border-radius:12px; width:90%; max-width:420px; text-align:center;">
+                  <h3 style="margin-top:0">Konfirmasi Reset</h3>
+                  <p id="resetConfirmText" style="color:#333; margin:10px 0 16px;">Anda yakin ingin mereset skor dan mengembalikan semua kartu ke posisi semula? (Tidak dapat dibatalkan)</p>
+                  <div style="display:flex; gap:10px; justify-content:center;">
+                    <button id="cancelResetBtn" style="padding:8px 12px; background:#6c757d; color:white; border:none; border-radius:8px; cursor:pointer;">Batal</button>
+                    <button id="confirmResetBtn" style="padding:8px 12px; background:#ff4757; color:white; border:none; border-radius:8px; cursor:pointer;">Ya, Reset</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Toast notification -->
+              <div id="toast" style="display:none; position:fixed; right:20px; bottom:20px; background:rgba(0,0,0,0.85); color:white; padding:10px 14px; border-radius:8px; z-index:4000; font-weight:600;"></div>
+    </div>
+
+    <!-- Answer Input Modal (besar, dengan riwayat jawaban per kartu) -->
+    <div id="answerInputModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3500; justify-content:center; align-items:center;">
+      <div style="background:white; padding:16px; border-radius:12px; width:92%; max-width:520px;">
+        <h3 style="margin:0 0 8px 0">Masukkan Jawaban</h3>
+        <p id="answerModalHint" style="margin:0 0 12px 0; color:#444; font-size:0.95em">Ketik konfigurasi elektron lengkap di kotak di bawah. Riwayat input untuk unsur ini disimpan di sisi client.</p>
+        <textarea id="answerModalInput" rows="3" style="width:100%; padding:8px; font-size:14px; box-sizing:border-box; resize:vertical;"></textarea>
+        <div style="display:flex; gap:8px; margin-top:10px; align-items:center; justify-content:flex-end;">
+          <button id="answerModalCancel" style="padding:8px 12px; background:#6c757d; color:white; border:none; border-radius:8px; cursor:pointer;">Batal</button>
+          <button id="answerModalSubmit" style="padding:8px 12px; background:linear-gradient(135deg,#00d4ff,#0099ff); color:white; border:none; border-radius:8px; cursor:pointer;">Kirim Jawaban</button>
+        </div>
+        <hr style="margin:12px 0; border:none; border-top:1px solid #eee" />
+        <div>
+          <strong>Riwayat Input</strong>
+          <div id="answerHistory" style="margin-top:8px; max-height:160px; overflow:auto; background:#fafafa; padding:8px; border-radius:8px; border:1px solid #eee; font-size:13px;"></div>
         </div>
       </div>
     </div>
@@ -1306,24 +1426,29 @@
       let musicEnabled = true; // backsound aktif
 
       // Tombol efek suara
+      // Tombol efek suara dan musik — akan dimasukkan ke container #soundControls
       const toggleSoundBtn = document.createElement("button");
       toggleSoundBtn.id = "toggleSound";
-      toggleSoundBtn.style = "margin:10px;padding:6px 12px;";
-      toggleSoundBtn.textContent = "🎚️ Matikan Efek Suara";
-      document.body.insertBefore(
-        toggleSoundBtn,
-        document.querySelector(".table-wrap")
-      );
+      toggleSoundBtn.className = 'nav-button';
+      toggleSoundBtn.style = "padding:6px 12px;";
+      toggleSoundBtn.textContent = "🎚️ Efek Suara";
 
       // Tombol backsound
       const toggleMusicBtn = document.createElement("button");
       toggleMusicBtn.id = "toggleMusic";
-      toggleMusicBtn.style = "margin:10px;padding:6px 12px;";
-      toggleMusicBtn.textContent = "🎵 Matikan Musik";
-      document.body.insertBefore(
-        toggleMusicBtn,
-        document.querySelector(".table-wrap")
-      );
+      toggleMusicBtn.className = 'nav-button';
+      toggleMusicBtn.style = "padding:6px 12px;";
+      toggleMusicBtn.textContent = "🎵 Musik";
+
+      // append to the sound controls row if present, otherwise fallback to body near table
+      const soundRow = document.getElementById('soundControls');
+      if (soundRow) {
+        soundRow.appendChild(toggleSoundBtn);
+        soundRow.appendChild(toggleMusicBtn);
+      } else {
+        document.body.insertBefore(toggleSoundBtn, document.querySelector('.table-wrap'));
+        document.body.insertBefore(toggleMusicBtn, document.querySelector('.table-wrap'));
+      }
 
       // Jalankan backsound setelah klik pertama (autoplay-safe)
       window.addEventListener(
@@ -1442,6 +1567,9 @@
         const color = getColor(el.z);
         const card = document.createElement("div");
         card.className = "element";
+        // attach atomic number and correct spdf for later lookups
+        card.dataset.z = String(el.z);
+        card.dataset.spdf = el.spdf;
         card.style.gridRow = el.r;
         card.style.gridColumn = el.c;
         card.innerHTML = `
@@ -1465,6 +1593,7 @@
 
         const input = card.querySelector("input");
         const submitBtn = card.querySelector(".submitBtn");
+  // ensure we can call the check from outside (modal confirm)
         function checkAnswer() {
           // Format input pengguna dengan superscript
           const userInput = formatElectronConfig(input.value.trim());
@@ -1476,6 +1605,7 @@
           if (normalizedUser === normalizedCorrect) {
             // Jawaban benar
             card.classList.add("flipped");
+            card.dataset.answered = "1"; // mark as answered so it persists / cannot be toggled locally
             if (soundEnabled) {
               clickSound.currentTime = 0;
               clickSound.play();
@@ -1486,11 +1616,37 @@
             input.style.borderColor = "green";
             input.style.backgroundColor = "rgba(0, 255, 0, 0.1)";
 
-            // ✅ Tambahkan skor dan simpan ke Firebase
-            userScore++;
-            document.getElementById("userScore").textContent = userScore;
-            document.getElementById("answeredCorrect").textContent = userScore;
-            simpanSkor(userScore);
+            // ✅ Tambahkan skor dan simpan ke Firebase (aman jika simpanSkor belum terpasang)
+            window.userScore = (window.userScore || 0) + 1;
+            const score = window.userScore;
+            const userScoreEl = document.getElementById("userScore");
+            if (userScoreEl) userScoreEl.textContent = `Skor: ${score}`;
+            const answeredEl = document.getElementById("answeredCorrect");
+            if (answeredEl) answeredEl.textContent = score;
+
+            // record the raw user input into per-card history (for modal)
+            try { pushHistory(input.value); } catch(e){}
+
+            // Save answered element + score to DB via markAnswered (preferred) or fallback to simpanSkor
+            if (typeof window.markAnswered === "function") {
+              try {
+                window.markAnswered(el.z, score);
+              } catch (e) {
+                console.warn("markAnswered error:", e);
+              }
+            } else if (typeof window.simpanSkor === "function") {
+              try {
+                window.simpanSkor(score);
+              } catch (e) {
+                console.warn("simpanSkor error:", e);
+              }
+            } else {
+              // retry briefly in case module not ready
+              setTimeout(() => {
+                if (typeof window.markAnswered === "function") window.markAnswered(el.z, score);
+                else if (typeof window.simpanSkor === "function") window.simpanSkor(score);
+              }, 800);
+            }
           } else {
             // Jawaban salah
             input.style.borderColor = "red";
@@ -1509,16 +1665,27 @@
             input.style.animation = "";
           }, 500);
         }
+        // open modal when user focuses the input or clicks submit so they can see a larger input and history
+        input.addEventListener("focus", (e) => {
+          openAnswerModal(card);
+        });
+
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            checkAnswer();
+            openAnswerModal(card);
           }
         });
 
-        submitBtn.addEventListener("click", checkAnswer);
+        submitBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          openAnswerModal(card);
+        });
 
-        const inner = card.querySelector(".inner");
+  const inner = card.querySelector(".inner");
+
+  // attach checkAnswer to card element so modal can call it
+  card.checkAnswer = checkAnswer;
 
         input.addEventListener("keyup", (e) => {
           if (e.key === "Enter") {
@@ -1536,135 +1703,565 @@
           }
         });
 
-        // Tambahkan klik pada inner untuk reset
+        // Klik pada inner hanya bereaksi jika kartu belum 'answered' (persisted)
         inner.addEventListener("click", () => {
+          if (card.dataset.answered === "1") return; // block toggling for persisted answers
           if (card.classList.contains("flipped")) {
-            // Jika sudah terbalik, balikkan lagi
+            // Jika sudah terbalik, balikkan lagi (lokal saja)
             card.classList.remove("flipped");
             input.value = ""; // hapus jawaban
             input.disabled = false; // aktifkan input kembali
+            submitBtn.disabled = false;
             input.style.borderColor = ""; // reset border
+          } else {
+            // flip manually if user clicks front (no answer) — for exploration
+            card.classList.add("flipped");
           }
         });
+
+        // store per-card input history in dataset.history as JSON string
+        function pushHistory(raw) {
+          try {
+            let arr = [];
+            if (card.dataset.history) arr = JSON.parse(card.dataset.history);
+            arr.push(String(raw || "").trim());
+            // keep last 30 entries
+            if (arr.length > 30) arr = arr.slice(arr.length - 30);
+            card.dataset.history = JSON.stringify(arr);
+          } catch (e) {
+            card.dataset.history = JSON.stringify([String(raw || "").trim()]);
+          }
+        }
+
+        // Update answer history UI if modal open for this card
+        function updateModalHistoryUI() {
+          const modal = document.getElementById('answerInputModal');
+          if (!modal || modal.style.display === 'none') return;
+          const histEl = document.getElementById('answerHistory');
+          const zInModal = modal.dataset.z;
+          if (!histEl) return;
+          let arr = [];
+          try { arr = card.dataset.history ? JSON.parse(card.dataset.history) : []; } catch(e){ arr = []; }
+          histEl.innerHTML = '';
+          if (arr.length === 0) {
+            histEl.innerHTML = '<div style="color:#666">Belum ada input untuk unsur ini.</div>';
+            return;
+          }
+          arr.slice().reverse().forEach((v) => {
+            const d = document.createElement('div');
+            d.style.padding = '6px 8px';
+            d.style.borderBottom = '1px solid #f0f0f0';
+            d.style.fontSize = '13px';
+            d.textContent = v || '(kosong)';
+            histEl.appendChild(d);
+          });
+        }
 
         grid.appendChild(card);
       });
+      // ---- Modal wiring: open/close/submit handlers ----
+      (function wireAnswerModal(){
+        const modal = document.getElementById('answerInputModal');
+        const modalInput = document.getElementById('answerModalInput');
+        const histEl = document.getElementById('answerHistory');
+        const btnCancel = document.getElementById('answerModalCancel');
+        const btnSubmit = document.getElementById('answerModalSubmit');
+        if (!modal || !modalInput || !btnCancel || !btnSubmit) return;
+
+        function openAnswerModal(card) {
+          if (!card) return;
+          modal.dataset.z = card.dataset.z || '';
+          // set textarea to current input value
+          const input = card.querySelector('input');
+          modalInput.value = input ? input.value : '';
+          modal.style.display = 'flex';
+          setTimeout(()=> modalInput.focus(), 50);
+          // populate history
+          try {
+            const arr = card.dataset.history ? JSON.parse(card.dataset.history) : [];
+            histEl.innerHTML = '';
+            if (arr.length === 0) histEl.innerHTML = '<div style="color:#666">Belum ada input untuk unsur ini.</div>';
+            arr.slice().reverse().forEach((v) => {
+              const d = document.createElement('div');
+              d.style.padding = '6px 8px';
+              d.style.borderBottom = '1px solid #f0f0f0';
+              d.style.fontSize = '13px';
+              d.textContent = v || '(kosong)';
+              histEl.appendChild(d);
+            });
+          } catch(e){ histEl.innerHTML = '<div style="color:#666">Belum ada input untuk unsur ini.</div>'; }
+        }
+
+        window.openAnswerModal = openAnswerModal;
+
+        btnCancel.onclick = () => {
+          modal.style.display = 'none';
+        };
+
+        btnSubmit.onclick = () => {
+          const z = modal.dataset.z;
+          if (!z) return;
+          const card = document.querySelector(`.element[data-z="${z}"]`);
+          if (!card) return;
+          // write value back to card input and call its checkAnswer
+          const input = card.querySelector('input');
+          if (input) input.value = modalInput.value.trim();
+          // push into history on the card
+          try {
+            let arr = card.dataset.history ? JSON.parse(card.dataset.history) : [];
+            arr.push(String(modalInput.value || '').trim());
+            if (arr.length > 30) arr = arr.slice(arr.length - 30);
+            card.dataset.history = JSON.stringify(arr);
+          } catch(e){ card.dataset.history = JSON.stringify([String(modalInput.value || '').trim()]); }
+
+          modal.style.display = 'none';
+          // call the card's checkAnswer if present; else try to click its submit button
+          try {
+            if (typeof card.checkAnswer === 'function') card.checkAnswer();
+            else {
+              const sb = card.querySelector('.submitBtn');
+              if (sb) sb.click();
+            }
+          } catch(e){ console.error('modal submit check error', e); }
+        };
+
+        // allow Enter to submit inside textarea with Ctrl+Enter to insert newline
+        modalInput.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' && !ev.ctrlKey) {
+            ev.preventDefault();
+            btnSubmit.click();
+          }
+          if (ev.key === 'Escape') {
+            modal.style.display = 'none';
+          }
+        });
+      })();
     </script>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import {
-        getAuth,
-        onAuthStateChanged,
-        signOut,
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import {
-        getDatabase,
-        ref,
-        set,
-        get,
-        onValue,
-      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+      <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+          getAuth,
+          onAuthStateChanged,
+          signOut,
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+          getDatabase,
+          ref,
+          set,
+          get,
+          onValue,
+          remove,
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-      // 🔥 Konfigurasi Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyC_9KDssyYNV6vBh3yKLnyFwZVsk47uq7I",
-        authDomain: "login-731fd.firebaseapp.com",
-        databaseURL: "https://login-731fd-default-rtdb.firebaseio.com/",
-        projectId: "login-731fd",
-        storageBucket: "login-731fd.appspot.com",
-        messagingSenderId: "1000932743704",
-        appId: "1:1000932743704:web:c2e2fc36435ed2fd48416d",
-      };
+        // 🔥 Konfigurasi Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyC_9KDssyYNV6vBh3yKLnyFwZVsk47uq7I",
+          authDomain: "login-731fd.firebaseapp.com",
+          databaseURL: "https://login-731fd-default-rtdb.firebaseio.com/",
+          projectId: "login-731fd",
+          storageBucket: "login-731fd.appspot.com",
+          messagingSenderId: "1000932743704",
+          appId: "1:1000932743704:web:c2e2fc36435ed2fd48416d",
+        };
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-      let currentUser = null;
-      let userScore = 0; // skor global
+        let currentUser = null;
+        let userScore = 0; // skor global
 
-      // 🔹 Deteksi login
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          console.log("✅ User login:", user.displayName, user.email);
-          document.getElementById("userDisplay").textContent = `👋 Hai, ${
-            user.displayName || "Tanpa Nama"
-          }!`;
-        } else {
-          alert("Silakan login terlebih dahulu.");
-          window.location.href = "index.html";
-        }
-      });
+        // 🔹 Deteksi login
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user;
+            console.log("✅ User login:", user.displayName, user.email);
+            document.getElementById("userDisplay").textContent = `👋 Hai, ${
+              user.displayName || "Tanpa Nama"
+            }!`;
+            // Cek profil user (users/{uid}) — jika belum ada 'kelas', minta input user
+            const userRef = ref(db, `users/${user.uid}`);
+            get(userRef)
+              .then((snapUser) => {
+                const profile = snapUser.exists() ? snapUser.val() : {};
+                const kelas = profile.kelas;
 
-      // 🔹 Simpan skor berdasarkan user login
-      function simpanSkor(skor) {
-        if (!currentUser) {
-          console.warn("User belum login, skor tidak tersimpan.");
-          return;
-        }
+                if (!kelas) {
+                  // tampilkan modal pilih kelas
+                  const modal = document.getElementById("chooseClassModal");
+                  if (modal) modal.style.display = "flex";
 
-        const uid = currentUser.uid;
-        const userRef = ref(db, `leaderboard/${uid}`);
+                  const saveBtn = document.getElementById("saveKelasBtn");
+                  const skipBtn = document.getElementById("skipKelasBtn");
+                  const select = document.getElementById("kelasSelect");
 
-        set(userRef, {
-          nama: currentUser.displayName || "Pengguna",
-          email: currentUser.email,
-          skor: skor,
-          waktu: new Date().toISOString(),
-        })
-          .then(() => console.log("✅ Skor tersimpan:", skor))
-          .catch((err) => console.error("❌ Gagal menyimpan skor:", err));
-      }
+                  function cleanup() {
+                    if (saveBtn) saveBtn.onclick = null;
+                    if (skipBtn) skipBtn.onclick = null;
+                  }
 
-      // 🔹 Tampilkan leaderboard
-      function showLeaderboard() {
-        const leaderboardRef = ref(db, "leaderboard");
-        onValue(leaderboardRef, (snapshot) => {
-          const data = snapshot.val();
-          const leaderboardBody = document.getElementById("leaderboardBody");
-          leaderboardBody.innerHTML = "";
+                  if (saveBtn) {
+                    saveBtn.onclick = () => {
+                      const pilihan = (select && select.value) || "";
+                      if (!pilihan) {
+                        alert("Pilih kelas terlebih dahulu atau tekan Lewati.");
+                        return;
+                      }
 
-          if (data) {
-            const daftar = Object.values(data).sort((a, b) => b.skor - a.skor);
-            daftar.forEach((p, i) => {
-              const tr = document.createElement("tr");
-              tr.innerHTML = `
-            <td class="rank rank-${i + 1}">${i + 1}</td>
-            <td class="player-name">${p.nama}</td>
-            <td class="score">${p.skor}</td>
-          `;
-              leaderboardBody.appendChild(tr);
-            });
+                      // simpan kelas ke users/{uid}/kelas
+                      set(ref(db, `users/${user.uid}/kelas`), pilihan)
+                        .then(() => {
+                          // simpan nama juga jika belum ada
+                          if (!profile.nama && user.displayName) {
+                            set(ref(db, `users/${user.uid}/nama`), user.displayName).catch(() => {});
+                          }
+                          const modal = document.getElementById("chooseClassModal");
+                          if (modal) modal.style.display = "none";
+                          cleanup();
+                          // perbarui leaderboard entry sekarang (jika ada skor tersimpan)
+                          if (typeof window.simpanSkor === "function") {
+                            const currentScore = window.userScore || 0;
+                            window.simpanSkor(currentScore);
+                          }
+                        })
+                        .catch((err) => {
+                          console.error("Gagal menyimpan kelas:", err);
+                          alert("Gagal menyimpan kelas. Coba lagi.");
+                        });
+                    };
+                  }
+
+                  if (skipBtn) {
+                    skipBtn.onclick = () => {
+                      const modal = document.getElementById("chooseClassModal");
+                      if (modal) modal.style.display = "none";
+                      cleanup();
+                    };
+                  }
+                }
+
+                // Ambil skor yang tersimpan di leaderboard (jika ada) dan tampilkan.
+                // Jika user sudah mengumpulkan poin di session sebelum modul Firebase siap,
+                // gabungkan: pakai nilai tertinggi antara session (window.userScore) dan saved score.
+                const leaderboardRef = ref(db, `leaderboard/${user.uid}`);
+                return get(leaderboardRef).then((lbSnap) => {
+                  return { lbSnap, profile };
+                });
+              })
+              .then(({ lbSnap, profile }) => {
+                const saved = lbSnap && lbSnap.exists() ? Number(lbSnap.val().skor || 0) : 0;
+                const session = Number(window.userScore || 0);
+                // get answered list and use length to help determine merged score
+                return get(ref(db, `users/${user.uid}/answered`)).then((ansSnap) => {
+                  let answeredArr = [];
+                  if (ansSnap && ansSnap.exists()) {
+                    const val = ansSnap.val();
+                    if (Array.isArray(val)) answeredArr = val.map(Number);
+                    else if (typeof val === 'object') answeredArr = Object.values(val).map(Number);
+                  }
+                  const answeredLen = answeredArr.length || 0;
+                  const merged = Math.max(saved, session, answeredLen);
+                  userScore = merged;
+                  window.userScore = merged;
+
+                  const userScoreEl = document.getElementById("userScore");
+                  if (userScoreEl) userScoreEl.textContent = `Skor: ${merged}`;
+                  const answeredEl = document.getElementById("answeredCorrect");
+                  if (answeredEl) answeredEl.textContent = merged;
+
+                  // Jika session memiliki skor lebih tinggi daripada yang tersimpan, update DB
+                  if (session > saved && typeof window.simpanSkor === "function") {
+                    try {
+                      window.simpanSkor(session);
+                    } catch (e) {
+                      console.warn("simpanSkor saat merge error:", e);
+                    }
+                  }
+
+                  // Flip answered cards in DOM
+                  if (answeredArr.length > 0 && typeof window.flipAnswered === 'function') {
+                    try {
+                      window.flipAnswered(answeredArr);
+                    } catch (e) {
+                      console.warn('flipAnswered error', e);
+                    }
+                  }
+                });
+              })
+              .catch(() => {});
           } else {
-            leaderboardBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Belum ada data</td></tr>`;
+            alert("Silakan login terlebih dahulu.");
+            window.location.href = "index.html";
           }
         });
 
-        // tampilkan modal
-        document.getElementById("leaderboardModal").style.display = "block";
+        // 🔹 Simpan skor berdasarkan user login
+      function simpanSkor(skor) {
+  if (!currentUser) {
+    console.warn("User belum login, skor tidak tersimpan.");
+    return;
+  }
+
+  const uid = currentUser.uid;
+  const userRef = ref(db, `users/${uid}`);
+
+  // 🔹 Ambil data kelas dari node users
+  get(userRef)
+    .then((snapshot) => {
+      let kelas = "Tidak Diketahui";
+      let nama = currentUser.displayName || "Pengguna";
+
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        kelas = userData.kelas || kelas;
+        nama = userData.nama || nama;
       }
 
-      // 🔹 Tutup leaderboard
-      function closeLeaderboard() {
-        document.getElementById("leaderboardModal").style.display = "none";
-      }
+      // 🔹 Simpan ke leaderboard (hanya jika skor baru lebih tinggi atau sama)
+      const leaderboardRef = ref(db, `leaderboard/${uid}`);
+      return get(leaderboardRef).then((lbSnap) => {
+        const existing = lbSnap && lbSnap.exists() ? Number(lbSnap.val().skor || 0) : 0;
+        if (skor >= existing) {
+          return set(leaderboardRef, {
+            nama: nama,
+            email: currentUser.email,
+            kelas: kelas,
+            skor: skor,
+            waktu: new Date().toISOString(),
+          });
+        }
+        // jika skor yang tersimpan lebih tinggi, jangan turunkan; resolve tanpa menulis
+        return Promise.resolve();
+      });
+    })
+    .then(() => {
+      console.log("✅ Skor tersimpan di leaderboard");
+    })
+    .catch((err) => {
+      console.error("❌ Gagal menyimpan skor:", err);
+    });
+}
+        // ⚙️ Tandai sebuah unsur sebagai dijawab (simpan daftar 'answered' pengguna)
+        function markAnswered(z, skor) {
+          if (!currentUser) {
+            console.warn('User belum login, tidak dapat menyimpan answered.');
+            return Promise.resolve();
+          }
+          const uid = currentUser.uid;
+          const answeredRef = ref(db, `users/${uid}/answered`);
 
-      // 🔹 Logout (opsional)
-      function logout() {
-        signOut(auth).then(() => {
-          alert("Anda telah logout.");
-          window.location.href = "index.html";
+          return get(answeredRef)
+            .then((snap) => {
+              let arr = [];
+              if (snap && snap.exists()) {
+                const v = snap.val();
+                if (Array.isArray(v)) arr = v.map(Number);
+                else if (typeof v === 'object') arr = Object.values(v).map(Number);
+              }
+              const num = Number(z);
+              if (!arr.includes(num)) arr.push(num);
+              arr = Array.from(new Set(arr)).sort((a, b) => a - b);
+              return set(answeredRef, arr).then(() => {
+                // simpan juga skor per-user di node users (opsional)
+                try { set(ref(db, `users/${uid}/skor`), skor); } catch (e) {}
+                // update leaderboard (simpanSkor sudah akan menulis bila >= existing)
+                if (typeof simpanSkor === 'function') simpanSkor(skor);
+              });
+            })
+            .catch((err) => {
+              console.error('Gagal update answered:', err);
+            });
+        }
+
+        // � Flip DOM cards berdasarkan daftar answered yang tersimpan
+        function flipAnswered(arr) {
+          if (!arr) return;
+          const list = Array.isArray(arr) ? arr.map(Number) : Object.values(arr).map(Number);
+          list.forEach((z) => {
+            try {
+              const card = document.querySelector(`.element[data-z="${z}"]`);
+              if (!card) return;
+              card.classList.add('flipped');
+              card.dataset.answered = '1';
+              const input = card.querySelector('input');
+              const submitBtn = card.querySelector('.submitBtn');
+              if (input) {
+                input.value = formatElectronConfig(card.dataset.spdf || '');
+                input.disabled = true;
+              }
+              if (submitBtn) submitBtn.disabled = true;
+            } catch (e) {
+              console.warn('flipAnswered item error', e);
+            }
+          });
+        }
+
+        // ♻️ Reset skor dan kartu user (user-triggered)
+        function showToast(msg, timeout = 3000) {
+          const t = document.getElementById('toast');
+          if (!t) return;
+          t.textContent = msg;
+          t.style.display = 'block';
+          t.style.opacity = '1';
+          if (t._timeout) clearTimeout(t._timeout);
+          t._timeout = setTimeout(() => {
+            t.style.opacity = '0';
+            setTimeout(() => (t.style.display = 'none'), 300);
+          }, timeout);
+        }
+
+        function resetProgress() {
+          // show confirmation modal instead of alert/confirm
+          if (!currentUser) {
+            showToast('Silakan login untuk mereset progres.');
+            return;
+          }
+          const modal = document.getElementById('resetConfirmModal');
+          const cancelBtn = document.getElementById('cancelResetBtn');
+          const confirmBtn = document.getElementById('confirmResetBtn');
+          if (!modal || !cancelBtn || !confirmBtn) {
+            // fallback to old confirm if modal missing
+            const ok = confirm('Yakin ingin mereset skor dan mengembalikan kartu? Tindakan ini akan menghapus progres Anda.');
+            if (!ok) return;
+            return actualResetProgress();
+          }
+
+          modal.style.display = 'flex';
+
+          function cleanup() {
+            cancelBtn.onclick = null;
+            confirmBtn.onclick = null;
+          }
+
+          cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            cleanup();
+          };
+
+          confirmBtn.onclick = () => {
+            modal.style.display = 'none';
+            cleanup();
+            actualResetProgress();
+          };
+        }
+
+        function actualResetProgress() {
+          const uid = currentUser.uid;
+          const userRef = ref(db, `users/${uid}`);
+          // Ambil profil untuk menulis ulang leaderboard minimal
+          get(userRef)
+            .then((snap) => {
+              const profile = snap && snap.exists() ? snap.val() : {};
+              const nama = profile.nama || currentUser.displayName || 'Pengguna';
+              const kelas = profile.kelas || '-';
+
+              // set answered ke array kosong dan users/{uid}/skor ke 0
+              const p1 = set(ref(db, `users/${uid}/answered`), []);
+              const p2 = set(ref(db, `users/${uid}/skor`), 0);
+              // dan set leaderboard skor ke 0 (karena user sendiri meminta reset)
+              const p3 = set(ref(db, `leaderboard/${uid}`), {
+                nama: nama,
+                email: currentUser.email,
+                kelas: kelas,
+                skor: 0,
+                waktu: new Date().toISOString(),
+              });
+
+              return Promise.all([p1, p2, p3]);
+            })
+            .then(() => {
+              // update UI: unflip all cards and reset counters
+              document.querySelectorAll('.element').forEach((card) => {
+                card.classList.remove('flipped');
+                delete card.dataset.answered;
+                const input = card.querySelector('input');
+                const submitBtn = card.querySelector('.submitBtn');
+                if (input) {
+                  input.value = '';
+                  input.disabled = false;
+                  input.style.borderColor = '';
+                  input.style.backgroundColor = '';
+                }
+                if (submitBtn) submitBtn.disabled = false;
+              });
+              window.userScore = 0;
+              const userScoreEl = document.getElementById('userScore');
+              if (userScoreEl) userScoreEl.textContent = 'Skor: 0';
+              const answeredEl = document.getElementById('answeredCorrect');
+              if (answeredEl) answeredEl.textContent = '0';
+              showToast('Progres berhasil di-reset.');
+            })
+            .catch((err) => {
+              console.error('Gagal mereset progres:', err);
+              showToast('Gagal mereset progres. Coba lagi.');
+            });
+        }
+        // �🔹 Tampilkan leaderboard
+  // 🔹 Tampilkan leaderboard (global atau per kelas)
+  function showLeaderboard(mode = "global") {
+    const leaderboardRef = ref(db, "leaderboard");
+    onValue(leaderboardRef, (snapshot) => {
+      const data = snapshot.val();
+      const leaderboardBody = document.getElementById("leaderboardBody");
+      leaderboardBody.innerHTML = "";
+
+      if (data) {
+        let daftar = Object.values(data);
+
+        // 🔸 Filter leaderboard berdasarkan kelas user
+        if (mode === "kelas" && currentUser) {
+          const userData = Object.values(data).find(
+            (u) => u.email === currentUser.email
+          );
+          const userKelas = userData?.kelas;
+          daftar = daftar.filter((u) => u.kelas === userKelas);
+        }
+
+        // 🔸 Urutkan berdasarkan skor tertinggi
+        daftar.sort((a, b) => b.skor - a.skor);
+
+        // 🔸 Tampilkan data
+        daftar.forEach((p, i) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="padding:6px;">${i + 1}</td>
+            <td style="padding:6px;">${p.nama}</td>
+            <td style="padding:6px;">${p.kelas || "-"}</td>
+            <td style="padding:6px;">${p.skor}</td>
+          `;
+          leaderboardBody.appendChild(tr);
         });
+      } else {
+        leaderboardBody.innerHTML =
+          `<tr><td colspan="4" style="padding:10px;">Belum ada data</td></tr>`;
       }
+    });
 
-      // ⏬ Simpan fungsi ke global agar bisa dipanggil dari script utama
-      window.simpanSkor = simpanSkor;
-      window.showLeaderboard = showLeaderboard;
-      window.closeLeaderboard = closeLeaderboard;
-      window.logout = logout;
-      window.userScore = userScore;
-    </script>
-  </body>
-</html>
+    // Tampilkan modal
+    document.getElementById("leaderboardModal").style.display = "flex";
+  }
+  // 🔹 Tutup leaderboard modal
+function closeLeaderboard() {
+  document.getElementById("leaderboardModal").style.display = "none";
+}
+        // 🔹 Logout (opsional)
+        function logout() {
+          signOut(auth).then(() => {
+            alert("Anda telah logout.");
+            window.location.href = "index.html";
+          });
+        }
+
+        // ⏬ Simpan fungsi ke global agar bisa dipanggil dari script utama
+        window.simpanSkor = simpanSkor;
+  window.markAnswered = markAnswered;
+  window.flipAnswered = flipAnswered;
+  window.resetProgress = resetProgress;
+        window.showLeaderboard = showLeaderboard;
+        window.closeLeaderboard = closeLeaderboard;
+        window.logout = logout;
+        window.userScore = userScore;
+      </script>
+    </body>
+  </html>
