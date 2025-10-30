@@ -1703,20 +1703,11 @@
           }
         });
 
-        // Klik pada inner hanya bereaksi jika kartu belum 'answered' (persisted)
+        // Klik pada inner tidak akan membalik kartu - harus melalui jawaban benar
         inner.addEventListener("click", () => {
           if (card.dataset.answered === "1") return; // block toggling for persisted answers
-          if (card.classList.contains("flipped")) {
-            // Jika sudah terbalik, balikkan lagi (lokal saja)
-            card.classList.remove("flipped");
-            input.value = ""; // hapus jawaban
-            input.disabled = false; // aktifkan input kembali
-            submitBtn.disabled = false;
-            input.style.borderColor = ""; // reset border
-          } else {
-            // flip manually if user clicks front (no answer) — for exploration
-            card.classList.add("flipped");
-          }
+          // Kartu tidak dibalik dengan klik manual
+          return;
         });
 
         // store per-card input history in dataset.history as JSON string
